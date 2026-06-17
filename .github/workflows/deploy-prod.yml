@@ -1,0 +1,42 @@
+name: Deploy - Production
+
+on:
+  push:
+    branches: [main]
+    paths: ["backend/**", "frontend/**"]
+
+concurrency:
+  group: prod-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Configure kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Update image tag
+        run: |
+          kubectl -n mailguard set image deployment/mailguard-api api=${{ secrets.REGISTRY }}/mailguard-api:${{ github.sha }}
+          kubectl -n mailguard set image deployment/mailguard-worker worker=${{ secrets.REGISTRY }}/mailguard-api:${{ github.sha }}
+          kubectl -n mailguard set image deployment/mailguard-beat beat=${{ secrets.REGISTRY }}/mailguard-api:${{ github.sha }}
+          kubectl -n mailguard set image deployment/mailguard-frontend frontend=${{ secrets.REGISTRY }}/mailguard-frontend:${{ github.sha }}
+
+      - name: Wait for rollout
+        run: |
+          kubectl -n mailguard rollout status deployment/mailguard-api --timeout=180s
+          kubectl -n mailguard rollout status deployment/mailguard-worker --timeout=180s
+          kubectl -n mailguard rollout status deployment/mailguard-frontend --timeout=180s
+
+      - name: Smoke test
+        run: |
+          sleep 10
+          curl -fsS https://app.mailguard.ai/health || exit 1
+          curl -fsS https://app.mailguard.ai/api/v1/health || exit 1

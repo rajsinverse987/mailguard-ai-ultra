@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mailguard-worker
+  namespace: mailguard
+spec:
+  replicas: 6
+  selector:
+    matchLabels:
+      app: mailguard-worker
+  template:
+    metadata:
+      labels:
+        app: mailguard-worker
+    spec:
+      containers:
+        - name: worker
+          image: mailguard/api:latest
+          command:
+            - celery
+            - -A
+            - app.workers.celery_app
+            - worker
+            - -l
+            - INFO
+            - --concurrency=4
+          envFrom:
+            - configMapRef: { name: mailguard-config }
+            - secretRef: { name: mailguard-secrets }
+          resources:
+            requests: { cpu: "500m", memory: 1Gi }
+            limits: { cpu: "2", memory: 3Gi }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mailguard-beat
+  namespace: mailguard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mailguard-beat
+  template:
+    metadata:
+      labels:
+        app: mailguard-beat
+    spec:
+      containers:
+        - name: beat
+          image: mailguard/api:latest
+          command:
+            - celery
+            - -A
+            - app.workers.celery_app
+            - beat
+            - -l
+            - INFO
+          envFrom:
+            - configMapRef: { name: mailguard-config }
+            - secretRef: { name: mailguard-secrets }
+          resources:
+            requests: { cpu: "100m", memory: 256Mi }
+            limits: { cpu: "500m", memory: 512Mi }

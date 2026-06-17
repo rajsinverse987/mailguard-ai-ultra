@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mailguard
+  labels:
+    name: mailguard
+    app.kubernetes.io/part-of: mailguard-ai-ultra

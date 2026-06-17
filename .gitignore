@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+.env
+.env.local
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# Node
+node_modules/
+.next/
+.nuxt/
+out/
+.parcel-cache/
+coverage/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Secrets / runtime
+*.pem
+*.key
+*.crt
+secrets.yaml
+.local/
+
+# Audio / cache artifacts
+voice_cache/
+chroma_data/
+logs/
+*.log
+*.err
+*_log.txt
+error.txt
+build_log.txt
+npm_log.txt

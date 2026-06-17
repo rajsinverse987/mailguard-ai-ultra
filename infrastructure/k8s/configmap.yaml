@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mailguard-config
+  namespace: mailguard
+data:
+  APP_ENV: "production"
+  LOG_LEVEL: "INFO"
+  OPENAI_MODEL: "gpt-4o-mini"
+  OPENAI_EMBEDDING_MODEL: "text-embedding-3-small"
+  OPENAI_TTS_MODEL: "tts-1"
+  WHATSAPP_PROVIDER: "meta"
+  CHROMA_PERSIST_DIR: "/data/chroma"
+  CELERY_BROKER_URL: "redis://mailguard-redis:6379/1"
+  CELERY_RESULT_BACKEND: "redis://mailguard-redis:6379/2"
+  REDIS_URL: "redis://mailguard-redis:6379/0"
+  GOOGLE_REDIRECT_URI: "https://app.mailguard.ai/api/v1/accounts/gmail/callback"
+  MS_REDIRECT_URI: "https://app.mailguard.ai/api/v1/accounts/outlook/callback"
+  MS_TENANT: "common"

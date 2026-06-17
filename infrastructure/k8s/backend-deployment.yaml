@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mailguard-api
+  namespace: mailguard
+spec:
+  selector:
+    app: mailguard-api
+  ports:
+    - port: 8000
+      targetPort: 8000
+      name: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mailguard-api
+  namespace: mailguard
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: mailguard-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: mailguard-api
+    spec:
+      containers:
+        - name: api
+          image: mailguard/api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef: { name: mailguard-config }
+            - secretRef: { name: mailguard-secrets }
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests: { cpu: "500m", memory: 1Gi }
+            limits: { cpu: "2", memory: 3Gi }
+          volumeMounts:
+            - name: chroma
+              mountPath: /data/chroma
+      volumes:
+        - name: chroma
+          persistentVolumeClaim:
+            claimName: mailguard-chroma-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mailguard-chroma-pvc
+  namespace: mailguard
+spec:
+  accessModes: ["ReadWriteMany"]
+  resources:
+    requests:
+      storage: 50Gi
