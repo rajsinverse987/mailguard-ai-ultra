@@ -135,6 +135,7 @@ cd frontend && npm test                       # frontend
 - [API Reference](docs/API.md)
 - [Security](docs/SECURITY.md)
 - [Production Deployment](docs/DEPLOYMENT.md)
+- URL LINK- http://localhost:3000/inbox
 
 ---
 
